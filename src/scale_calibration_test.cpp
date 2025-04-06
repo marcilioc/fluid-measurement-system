@@ -1,7 +1,7 @@
 /*
   HX711 Calibration
   Caio Marcilio dos Santos
-  Arduino UNO
+  ESP32
 */
 
 #include "HX711.h"  // HX711 library
