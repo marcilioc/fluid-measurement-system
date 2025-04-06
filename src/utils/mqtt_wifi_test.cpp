@@ -1,3 +1,9 @@
+/*
+  MQTT Messaging Test
+  Platform: ESP32 - DOIT ESP32 DEVKIT V1
+  Owner: Caio Marcilio dos Santos
+*/
+
 #include <WiFi.h>
 #include <PubSubClient.h>
 
