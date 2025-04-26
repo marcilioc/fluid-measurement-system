@@ -3,8 +3,9 @@
 #include <driver/adc.h>
 
 HX711 scale;
+static float calibrationFactor = DEFAULT_CALIBRATION_FACTOR;
 
-void set_scale_zero() {
+void tare_scale() {
     Serial.println();
     // Set new scale zero
     scale.tare();  
@@ -18,12 +19,21 @@ void setup_scale() {
     adc1_config_width(ADC_WIDTH_BIT_12);
     adc1_config_channel_atten(ADC1_CHANNEL_5, ADC_ATTEN_DB_0);
 
-    // Start scale measurement
-    scale.set_scale(CALIBRATION_FACTOR);  
+    // Start scale with default calibration factor
+    scale.set_scale(calibrationFactor);
     scale.begin(DOUT, CLK);
-    set_scale_zero();
+    tare_scale();
 }
 
 float read_weight() {
     return scale.get_units(10);
+}
+
+float get_calibration_factor() {
+    return calibrationFactor;
+}
+
+void set_calibration_factor(float factor) {
+    calibrationFactor = factor;
+    scale.set_scale(calibrationFactor);
 }

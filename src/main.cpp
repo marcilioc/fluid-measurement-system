@@ -1,4 +1,5 @@
 #include "config.h"
+#include "topics.h"
 #include "scale.h"
 #include "wifi_mqtt.h"
 
@@ -18,7 +19,7 @@ void IRAM_ATTR onTimer() {
 void setup() {
     Serial.begin(115200);
     setup_wifi();
-    client.setServer(MQTT_BROKER, MQTT_PORT);
+    setup_mqtt();
     setup_scale();
   
     timer = timerBegin(0, 80, true);
@@ -37,10 +38,10 @@ void loop() {
         portEXIT_CRITICAL(&timerMux);
 
         float weight = read_weight();
-        Serial.printf("Peso: %.2f\n", weight);
+        // Serial.printf("Peso: %.3f kg\n", weight);
         char payload[50];
-        snprintf(payload, sizeof(payload), "%.2f", weight);
-        client.publish(MQTT_TOPIC, payload);
+        snprintf(payload, sizeof(payload), "%.3f", weight);
+        client.publish(WEIGHT_TOPIC, payload);
         last_reading = weight;
     }
 }

@@ -14,12 +14,19 @@ void setup_wifi() {
   Serial.println("\nWi-Fi Connected!");
 }
 
-void reconnect_mqtt() {
+void setup_mqtt() {
     client.setServer(MQTT_BROKER, MQTT_PORT);
+    client.setCallback(callback);
+
+}
+
+void reconnect_mqtt() {
     while (!client.connected()) {
         Serial.print("Trying to connect to MQTT Broker...");
         if (client.connect(MQTT_CLIENT_ID)) {
             Serial.println("Connected!");
+        // client.subscribe("sistema/setpoint");
+        // client.subscribe("sistema/comando_saida");
         } else {
             Serial.print("Error, rc=");
             Serial.print(client.state());
@@ -39,4 +46,6 @@ void callback(char *topic, byte *payload, unsigned int length) {
       // Serial.print((char)payload[i]);
       rec_message += (char)payload[i];
     }
+    
+    Serial.println(rec_message);
 }
