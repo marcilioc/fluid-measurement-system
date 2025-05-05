@@ -8,7 +8,7 @@ static float calibrationFactor = DEFAULT_CALIBRATION_FACTOR;
 void tare_scale() {
     Serial.println();
     // Set new scale zero
-    scale.tare();  
+    scale.tare();
     Serial.println("New scale zero setted");
   }
 

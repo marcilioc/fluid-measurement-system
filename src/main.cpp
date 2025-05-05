@@ -2,6 +2,7 @@
 #include "topics.h"
 #include "scale.h"
 #include "wifi_mqtt.h"
+#include "gpio_utils.h"
 
 // Timer
 hw_timer_t * timer = NULL;
@@ -17,6 +18,11 @@ void IRAM_ATTR onTimer() {
 }
 
 void setup() {
+    // configure_pin(STATUS, Mode::output);  // Status embedded LED
+    configure_pin(RLY1, Mode::output);
+    configure_pin(RLY2, Mode::output);
+    set_output_state(RLY1, 0);  // Enabled
+    set_output_state(RLY2, 1);  // Disabled
     Serial.begin(115200);
     setup_wifi();
     setup_mqtt();
@@ -41,7 +47,7 @@ void loop() {
         // Serial.printf("Peso: %.3f kg\n", weight);
         char payload[50];
         snprintf(payload, sizeof(payload), "%.3f", weight);
-        client.publish(WEIGHT_TOPIC, payload);
+        client.publish(WEIGHT_TOPIC.c_str(), payload);
         last_reading = weight;
     }
 }

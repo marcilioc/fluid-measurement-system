@@ -1,4 +1,5 @@
 #include "config.h"
+#include "topics.h"
 #include "wifi_mqtt.h"
 
 WiFiClient espClient;
@@ -17,7 +18,6 @@ void setup_wifi() {
 void setup_mqtt() {
     client.setServer(MQTT_BROKER, MQTT_PORT);
     client.setCallback(callback);
-
 }
 
 void reconnect_mqtt() {
@@ -25,8 +25,9 @@ void reconnect_mqtt() {
         Serial.print("Trying to connect to MQTT Broker...");
         if (client.connect(MQTT_CLIENT_ID)) {
             Serial.println("Connected!");
-        // client.subscribe("sistema/setpoint");
-        // client.subscribe("sistema/comando_saida");
+            client.subscribe(ALARM_SETPOINT.c_str());
+            client.subscribe(ENABLE_WB01.c_str());
+            client.subscribe(ENABLE_WB02.c_str());
         } else {
             Serial.print("Error, rc=");
             Serial.print(client.state());
@@ -36,16 +37,13 @@ void reconnect_mqtt() {
 }
 
 // Reads messages in subscribed topics
-void callback(char *topic, byte *payload, unsigned int length) {
-    String rec_message;
-    Serial.print("Message arrived [");
-    Serial.print(topic);
-    Serial.print("] ");
-    
+void callback(std::string&& topic, byte *payload, unsigned int length) {
+    std::string message;
     for (int i = 0; i < length; i++) {
-      // Serial.print((char)payload[i]);
-      rec_message += (char)payload[i];
+        message += (char)payload[i];
     }
-    
-    Serial.println(rec_message);
+
+    Serial.printf("[MQTT] Mensagem recebida. Tópico: %s | Conteúdo: %s\n", topic.c_str(), message.c_str());
+
+    dispatch_messages(topic.c_str(), message.c_str());
 }
