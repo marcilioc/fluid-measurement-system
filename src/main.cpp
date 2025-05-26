@@ -3,7 +3,9 @@
 #include "scale.h"
 #include "wifi_mqtt.h"
 #include "gpio_utils.h"
+#include <driver/adc.h>
 
+static int calibration_factor = DEFAULT_CALIBRATION_FACTOR;
 // Timer
 hw_timer_t * timer = NULL;
 portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
@@ -17,6 +19,9 @@ void IRAM_ATTR onTimer() {
     portEXIT_CRITICAL_ISR(&timerMux);
 }
 
+Scale scale_wb01(GPIO_NUM_16, GPIO_NUM_17, calibration_factor);
+Scale scale_wb02(GPIO_NUM_18, GPIO_NUM_19, calibration_factor);
+
 void setup() {
     // configure_pin(STATUS, Mode::output);  // Status embedded LED
     configure_pin(RLY1, Mode::output);
@@ -26,7 +31,8 @@ void setup() {
     Serial.begin(115200);
     setup_wifi();
     setup_mqtt();
-    setup_scale();
+    scale_wb01.begin();
+    scale_wb02.begin();
   
     timer = timerBegin(0, 80, true);
     timerAttachInterrupt(timer, &onTimer, true);
@@ -43,11 +49,16 @@ void loop() {
         pending_read = false;
         portEXIT_CRITICAL(&timerMux);
 
-        float weight = read_weight();
-        // Serial.printf("Peso: %.3f kg\n", weight);
+        float weight_01 = scale_wb01.read_weight();
+        float weight_02 = scale_wb02.read_weight();
         char payload[50];
-        snprintf(payload, sizeof(payload), "%.3f", weight);
-        client.publish(WEIGHT_TOPIC.c_str(), payload);
-        last_reading = weight;
+
+        // Reading 01
+        snprintf(payload, sizeof(payload), "%.3f", weight_01);
+        client.publish(WEIGHT_TOPIC_01.c_str(), payload);
+        // Reading 02
+        snprintf(payload, sizeof(payload), "%.3f", weight_02);
+        client.publish(WEIGHT_TOPIC_02.c_str(), payload);
+        last_reading = weight_01;
     }
 }

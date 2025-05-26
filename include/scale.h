@@ -3,14 +3,24 @@
 
 #define DEFAULT_CALIBRATION_FACTOR 97980
 
+#include <functional>
 #include <HX711.h>
 
-extern HX711 scale;
+class Scale {
+private:
+    HX711 hx_conv;
+    int dout_pin;
+    int clk_pin;
+    float calibration_factor;
 
-void setup_scale();
-void set_calibration_factor(float factor);
-float get_calibration_factor();
-void tare_scale();
-float read_weight();
+public:
+    Scale(uint8_t dout, uint8_t sck, float factor);
+
+    void begin();
+    float read_weight();
+    void tare();
+    void set_calibration_factor(float factor);
+    float get_calibration_factor();
+};
 
 #endif

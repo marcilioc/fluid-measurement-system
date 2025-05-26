@@ -4,7 +4,8 @@
 #include <functional>
 
 // SEND TOPICS
-const std::string WEIGHT_TOPIC = "smfm/measurement/weight";
+const std::string WEIGHT_TOPIC_01 = "smfm/measurement/weight_01";
+const std::string WEIGHT_TOPIC_02 = "smfm/measurement/weight_02";
 const std::string CAL_FACTOR_TOPIC = "smfm/config/cal_factor";
 
 // RECEIVE TOPICS

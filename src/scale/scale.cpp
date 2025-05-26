@@ -2,38 +2,30 @@
 #include "scale.h"
 #include <driver/adc.h>
 
-HX711 scale;
-static float calibrationFactor = DEFAULT_CALIBRATION_FACTOR;
+// Define Scale object
+Scale::Scale(uint8_t dout, uint8_t clk, float factor) 
+    : dout_pin(dout), clk_pin(clk), calibration_factor(factor) {}
 
-void tare_scale() {
-    Serial.println();
-    // Set new scale zero
-    scale.tare();
-    Serial.println("New scale zero setted");
-  }
+void Scale::tare() {
+    hx_conv.tare();
+}
 
-void setup_scale() {
-    // ADCs configurarion
-    adc1_config_width(ADC_WIDTH_BIT_12);
-    adc1_config_channel_atten(ADC1_CHANNEL_4, ADC_ATTEN_DB_0);
-    adc1_config_width(ADC_WIDTH_BIT_12);
-    adc1_config_channel_atten(ADC1_CHANNEL_5, ADC_ATTEN_DB_0);
-
+void Scale::begin() {
     // Start scale with default calibration factor
-    scale.set_scale(calibrationFactor);
-    scale.begin(DOUT, CLK);
-    tare_scale();
+    hx_conv.set_scale(calibration_factor);
+    hx_conv.begin(dout_pin, clk_pin);
+    Scale::tare();
 }
 
-float read_weight() {
-    return scale.get_units(10);
+float Scale::read_weight() {
+    return hx_conv.get_units(10);
 }
 
-float get_calibration_factor() {
-    return calibrationFactor;
+float Scale::get_calibration_factor() {
+    return calibration_factor;
 }
 
-void set_calibration_factor(float factor) {
-    calibrationFactor = factor;
-    scale.set_scale(calibrationFactor);
+void Scale::set_calibration_factor(float factor) {
+    calibration_factor = factor;
+    hx_conv.set_scale(calibration_factor);
 }
