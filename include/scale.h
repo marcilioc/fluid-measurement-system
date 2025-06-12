@@ -18,6 +18,7 @@ public:
 
     void begin();
     float read_weight();
+    long read_raw_value();
     void tare();
     void set_calibration_factor(float factor);
     float get_calibration_factor();

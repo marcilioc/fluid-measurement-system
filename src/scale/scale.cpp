@@ -1,6 +1,5 @@
 #include "config.h"
 #include "scale.h"
-#include <driver/adc.h>
 
 // Define Scale object
 Scale::Scale(uint8_t dout, uint8_t clk, float factor) 
@@ -15,6 +14,10 @@ void Scale::begin() {
     hx_conv.set_scale(calibration_factor);
     hx_conv.begin(dout_pin, clk_pin);
     Scale::tare();
+}
+
+long Scale::read_raw_value() {
+    return hx_conv.read();
 }
 
 float Scale::read_weight() {
