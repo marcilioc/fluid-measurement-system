@@ -1,9 +1,9 @@
-#include "config.h"
 #include "scale.h"
 
 // Define Scale object
 Scale::Scale(uint8_t dout, uint8_t clk, float factor) 
-    : dout_pin(dout), clk_pin(clk), calibration_factor(factor) {}
+    : dout_pin(dout), clk_pin(clk), calibration_factor(factor) {
+}
 
 void Scale::tare() {
     hx_conv.tare();

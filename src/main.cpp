@@ -1,9 +1,8 @@
 #include "config.h"
 #include "topics.h"
-#include "scale.h"
+#include "app_globals.h"
 #include "wifi_mqtt.h"
 #include "gpio_utils.h"
-#include <driver/adc.h>
 
 static int calibration_factor = DEFAULT_CALIBRATION_FACTOR;
 // Timer
@@ -19,8 +18,8 @@ void IRAM_ATTR onTimer() {
     portEXIT_CRITICAL_ISR(&timerMux);
 }
 
-Scale scale_wb01(GPIO_NUM_16, GPIO_NUM_17, calibration_factor);
-Scale scale_wb02(GPIO_NUM_18, GPIO_NUM_19, calibration_factor);
+Scale scale_s01(GPIO_NUM_16, GPIO_NUM_17, calibration_factor);
+Scale scale_s02(GPIO_NUM_18, GPIO_NUM_19, calibration_factor);
 
 void setup() {
     // configure_pin(STATUS, Mode::output);  // Status embedded LED
@@ -31,9 +30,9 @@ void setup() {
     Serial.begin(115200);
     setup_wifi();
     setup_mqtt();
-    scale_wb01.begin();
-    scale_wb02.begin();
-  
+    scale_s01.begin();
+    scale_s02.begin();
+
     timer = timerBegin(0, 80, true);
     timerAttachInterrupt(timer, &onTimer, true);
     timerAlarmWrite(timer, 1000000, true); // Em microssegundos
@@ -49,8 +48,8 @@ void loop() {
         pending_read = false;
         portEXIT_CRITICAL(&timerMux);
 
-        float weight_01 = scale_wb01.read_weight();
-        float weight_02 = scale_wb02.read_weight();
+        float weight_01 = scale_s01.read_weight();
+        float weight_02 = scale_s02.read_weight();
         char payload[50];
 
         // Reading 01

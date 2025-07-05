@@ -3,8 +3,8 @@
 
 #define DEFAULT_CALIBRATION_FACTOR 97980
 
-#include <functional>
 #include <HX711.h>
+#include "config.h"
 
 class Scale {
 private:
