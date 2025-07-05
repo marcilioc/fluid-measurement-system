@@ -26,8 +26,10 @@ void reconnect_mqtt() {
         if (client.connect(MQTT_CLIENT_ID)) {
             Serial.println("Connected!");
             client.subscribe(ALARM_SETPOINT.c_str());
-            client.subscribe(ENABLE_WB01.c_str());
-            client.subscribe(ENABLE_WB02.c_str());
+            client.subscribe(ENABLE_S01.c_str());
+            client.subscribe(ENABLE_S02.c_str());
+            client.subscribe(TARE_S01.c_str());
+            client.subscribe(TARE_S02.c_str());
         } else {
             Serial.print("Error, rc=");
             Serial.print(client.state());
