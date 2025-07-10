@@ -55,7 +55,7 @@ void Scale::check_alarm(float weight) {
         } else if (weight > setpoint) {
             status = 2;
         }
-    } else if (operation = false') {
+    } else if (operation = false) {
         status = 1;
     }
 }
