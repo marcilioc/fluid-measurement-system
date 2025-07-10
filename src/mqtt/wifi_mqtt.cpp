@@ -25,11 +25,11 @@ void reconnect_mqtt() {
         Serial.print("Trying to connect to MQTT Broker...");
         if (client.connect(MQTT_CLIENT_ID)) {
             Serial.println("Connected!");
-            client.subscribe(ALARM_SETPOINT.c_str());
-            client.subscribe(ENABLE_S01.c_str());
-            client.subscribe(ENABLE_S02.c_str());
+            client.subscribe(ALARM_SETPOINT_01.c_str());
+            client.subscribe(ALARM_SETPOINT_02.c_str());
             client.subscribe(TARE_S01.c_str());
             client.subscribe(TARE_S02.c_str());
+            client.subscribe(START.c_str());
         } else {
             Serial.print("Error, rc=");
             Serial.print(client.state());

@@ -12,10 +12,17 @@ private:
     int dout_pin;
     int clk_pin;
     float calibration_factor;
+    float setpoint;
 
 public:
     Scale(uint8_t dout, uint8_t sck, float factor);
 
+    int status;
+    bool operation = false;
+
+    void set_operation_status(bool op_status);
+    void set_alarm(float weight);
+    void check_alarm(float weight);
     void begin();
     float read_weight();
     long read_raw_value();

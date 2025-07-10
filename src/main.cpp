@@ -3,6 +3,7 @@
 #include "app_globals.h"
 #include "wifi_mqtt.h"
 #include "gpio_utils.h"
+#include "operation.h"
 
 static int calibration_factor = DEFAULT_CALIBRATION_FACTOR;
 // Timer
@@ -25,7 +26,7 @@ void setup() {
     // configure_pin(STATUS, Mode::output);  // Status embedded LED
     configure_pin(RLY1, Mode::output);
     configure_pin(RLY2, Mode::output);
-    set_output_state(RLY1, 0);  // Enabled
+    set_output_state(RLY1, 1);  // Disabled
     set_output_state(RLY2, 1);  // Disabled
     Serial.begin(115200);
     setup_wifi();
@@ -40,6 +41,7 @@ void setup() {
 }
 
 void loop() {
+    char payload[10];
     if (!client.connected()) reconnect_mqtt();
     client.loop();
 
@@ -49,8 +51,22 @@ void loop() {
         portEXIT_CRITICAL(&timerMux);
 
         float weight_01 = scale_s01.read_weight();
+        scale_s01.check_alarm(weight_01);
+        
         float weight_02 = scale_s02.read_weight();
-        char payload[50];
+        scale_s02.check_alarm(weight_02);
+
+        if (scale_s01.status) {
+            snprintf(payload, sizeof(payload), "%d", scale_s01.status);
+            client.publish(STATUS_TOPIC_01.c_str(), payload);
+        }
+
+        if (scale_s02.status) {
+            snprintf(payload, sizeof(payload), "%d", scale_s02.status);
+            client.publish(STATUS_TOPIC_02.c_str(), payload);
+        }
+
+        operate(scale_s01.status, scale_s02.status);
 
         // Reading 01
         snprintf(payload, sizeof(payload), "%.3f", weight_01);
@@ -58,6 +74,5 @@ void loop() {
         // Reading 02
         snprintf(payload, sizeof(payload), "%.3f", weight_02);
         client.publish(WEIGHT_TOPIC_02.c_str(), payload);
-        last_reading = weight_01;
     }
 }
