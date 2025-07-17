@@ -14,7 +14,7 @@ void Scale::begin() {
     hx_conv.set_scale(calibration_factor);
     hx_conv.begin(dout_pin, clk_pin);
     Scale::tare();
-    status = 1;
+    conn_status = Status::CONNECTED;
 }
 
 long Scale::read_raw_value() {
@@ -22,7 +22,8 @@ long Scale::read_raw_value() {
 }
 
 float Scale::read_weight() {
-    return hx_conv.get_units(10);
+    last_reading = hx_conv.get_units(10);
+    return last_reading;
 }
 
 float Scale::get_calibration_factor() {
@@ -37,10 +38,8 @@ void Scale::set_calibration_factor(float factor) {
 void Scale::set_operation_status(bool op_status) {
     if (op_status == true) {
         operation = true;
-        status = 2;
     } else if (op_status == false) {
         operation = false;
-        status = 1;
     }
 }
 
@@ -48,14 +47,22 @@ void Scale::set_alarm(float weight) {
     setpoint = weight;
 }
 
-void Scale::check_alarm(float weight) {
-    if(operation = true) {
-        if(weight <= setpoint) {
-            status = 3;
-        } else if (weight > setpoint) {
-            status = 2;
+void Scale::check_status() {    
+    if (operation == true) {
+        if (is_active == true & last_reading >= setpoint) {
+            conn_status = Status::OPERATING;
+        } else if (is_active == true & last_reading < setpoint) {
+            conn_status = Status::EMPTY;
+        } else if (is_active == false & last_reading >= setpoint) {
+            conn_status = Status::STANDBY;
+        } else if (is_active == false & last_reading < setpoint) {
+            conn_status = Status::EMPTY;
         }
     } else if (operation = false) {
-        status = 1;
-    }
+        if (last_reading >= setpoint) {
+            conn_status = Status::STANDBY;
+        } else if (last_reading < setpoint){
+            conn_status = Status::EMPTY;
+        }
+    }   
 }

@@ -15,3 +15,7 @@ void configure_pin(gpio_num_t pin, Mode mode, bool pullup, bool pulldown) {
 void set_output_state(gpio_num_t pin, bool state) {
     gpio_set_level(pin, state ? 1 : 0);
 }
+
+bool get_pin_state(gpio_num_t pin) {
+    return gpio_get_level((gpio_num_t)pin) == 1;
+}

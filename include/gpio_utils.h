@@ -18,6 +18,7 @@ enum class Mode {
 // Configure pin as input/output and set pull-up/down if it is input
 void configure_pin(gpio_num_t pin, Mode mode, bool pullup = false, bool pulldown = false);
 void set_output_state(gpio_num_t pin, bool state);
+bool get_pin_state(gpio_num_t pin);
 // void blink(gpio_num_t pin, unsigned long interval_ms);
 
 #endif

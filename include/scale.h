@@ -11,18 +11,27 @@ private:
     HX711 hx_conv;
     int dout_pin;
     int clk_pin;
+    float last_reading;
     float calibration_factor;
     float setpoint;
 
 public:
     Scale(uint8_t dout, uint8_t sck, float factor);
 
-    int status;
+    bool is_active;
+    enum class Status {
+        DISCONNECTED,
+        CONNECTED,
+        STANDBY,
+        OPERATING,
+        EMPTY
+    };
+    Status conn_status = Status::DISCONNECTED;
     bool operation = false;
 
     void set_operation_status(bool op_status);
     void set_alarm(float weight);
-    void check_alarm(float weight);
+    void check_status();
     void begin();
     float read_weight();
     long read_raw_value();

@@ -3,7 +3,6 @@
 #include "app_globals.h"
 #include "wifi_mqtt.h"
 #include "gpio_utils.h"
-#include "operation.h"
 
 static int calibration_factor = DEFAULT_CALIBRATION_FACTOR;
 // Timer
@@ -36,7 +35,7 @@ void setup() {
 
     timer = timerBegin(0, 80, true);
     timerAttachInterrupt(timer, &onTimer, true);
-    timerAlarmWrite(timer, 1000000, true); // Em microssegundos
+    timerAlarmWrite(timer, 500000, true); // Em microssegundos
     timerAlarmEnable(timer);
 }
 
@@ -50,23 +49,66 @@ void loop() {
         pending_read = false;
         portEXIT_CRITICAL(&timerMux);
 
+        // Convert status enum class to int
+        int status1 = static_cast<int>(scale_s01.conn_status);
+        int status2 = static_cast<int>(scale_s02.conn_status);
+        
         float weight_01 = scale_s01.read_weight();
-        scale_s01.check_alarm(weight_01);
+        scale_s01.check_status();
         
         float weight_02 = scale_s02.read_weight();
-        scale_s02.check_alarm(weight_02);
+        scale_s02.check_status();
 
-        if (scale_s01.status) {
-            snprintf(payload, sizeof(payload), "%d", scale_s01.status);
-            client.publish(STATUS_TOPIC_01.c_str(), payload);
+        // Check scales status
+        if (status1 == 1 && status2 == 1) {
+            // Not operating, disable both scales consumption
+            set_output_state(RLY1, 1); // Scale 01
+            set_output_state(RLY2, 1); // Scale 02
+            scale_s01.is_active = false;
+            scale_s02.is_active = false;
+        } else if(status1 == 2 && status2 == 2){
+            if (scale_s01.operation == true) {
+                set_output_state(RLY1, 0);
+                set_output_state(RLY2, 1);
+                scale_s01.is_active = true;
+                scale_s02.is_active = false;
+            } else if (scale_s01.operation = false){
+                set_output_state(RLY1, 1);
+                set_output_state(RLY2, 1);
+                scale_s01.is_active = false;
+                scale_s02.is_active = false;
+            }
+        } else if (status1 == 3 && status2 == 2){
+            scale_s01.is_active = true;
+            scale_s02.is_active = false;
+        } else if (status1 == 2 && status2 == 3){
+            scale_s01.is_active = false;
+            scale_s02.is_active = true;
+        } else if (status1 == 4 && status2 == 2) {
+            // Disable scale_s01 consumption and enable scale_s02 consumption
+            set_output_state(RLY1, 1);
+            set_output_state(RLY2, 0);
+            scale_s01.is_active = false;
+            scale_s02.is_active = true;
+        } else if (status1 == 2 && status2 == 4) {
+            // Disable scale_s02 consumption and enable scale_s01 consumption
+            set_output_state(RLY1, 0);
+            set_output_state(RLY2, 1);
+            scale_s01.is_active = true;
+            scale_s02.is_active = false;
+        } else if (status1 == 4 && status2 == 4) {
+            // Disable both scales consumption
+            set_output_state(RLY1, 1);
+            set_output_state(RLY2, 1);
+            scale_s01.is_active = false;
+            scale_s02.is_active = false;
         }
 
-        if (scale_s02.status) {
-            snprintf(payload, sizeof(payload), "%d", scale_s02.status);
-            client.publish(STATUS_TOPIC_02.c_str(), payload);
-        }
-
-        operate(scale_s01.status, scale_s02.status);
+        // Send Scales Status
+        snprintf(payload, sizeof(payload), "%d", status1);
+        client.publish(STATUS_TOPIC_01.c_str(), payload);
+        snprintf(payload, sizeof(payload), "%d", status2);
+        client.publish(STATUS_TOPIC_02.c_str(), payload);
 
         // Reading 01
         snprintf(payload, sizeof(payload), "%.3f", weight_01);
