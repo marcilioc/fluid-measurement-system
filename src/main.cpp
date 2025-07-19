@@ -72,7 +72,7 @@ void loop() {
                 set_output_state(RLY2, 1);
                 scale_s01.is_active = true;
                 scale_s02.is_active = false;
-            } else if (scale_s01.operation = false){
+            } else if (scale_s01.operation == false){
                 set_output_state(RLY1, 1);
                 set_output_state(RLY2, 1);
                 scale_s01.is_active = false;

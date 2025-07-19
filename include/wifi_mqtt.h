@@ -9,7 +9,7 @@ extern PubSubClient client;
 
 void setup_wifi();
 void setup_mqtt();
-void callback(std::string&& topic, byte *payload, unsigned int length);
+void callback(char* topic, byte* payload, unsigned int length);
 void reconnect_mqtt();
 
 #endif

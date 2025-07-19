@@ -58,7 +58,7 @@ void Scale::check_status() {
         } else if (is_active == false & last_reading < setpoint) {
             conn_status = Status::EMPTY;
         }
-    } else if (operation = false) {
+    } else if (operation == false) {
         if (last_reading >= setpoint) {
             conn_status = Status::STANDBY;
         } else if (last_reading < setpoint){

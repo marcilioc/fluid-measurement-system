@@ -39,13 +39,13 @@ void reconnect_mqtt() {
 }
 
 // Reads messages in subscribed topics
-void callback(std::string&& topic, byte *payload, unsigned int length) {
+void callback(char* topic, byte* payload, unsigned int length) {
     std::string message;
     for (int i = 0; i < length; i++) {
         message += (char)payload[i];
     }
 
-    Serial.printf("[MQTT] Mensagem recebida. Tópico: %s | Conteúdo: %s\n", topic.c_str(), message.c_str());
+    Serial.printf("[MQTT] Mensagem recebida. Tópico: %s | Conteúdo: %s\n", topic, message.c_str());
 
-    dispatch_messages(topic.c_str(), message.c_str());
+    dispatch_messages(topic, message.c_str());
 }
