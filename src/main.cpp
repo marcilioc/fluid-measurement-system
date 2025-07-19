@@ -1,8 +1,11 @@
 #include "config.h"
 #include "topics.h"
+#include "mqtt_manager.h"
 #include "app_globals.h"
-#include "wifi_mqtt.h"
 #include "gpio_utils.h"
+
+WiFiClient esp_client;
+MqttManager mqtt(&esp_client);
 
 static int calibration_factor = DEFAULT_CALIBRATION_FACTOR;
 // Timer
@@ -21,28 +24,57 @@ void IRAM_ATTR onTimer() {
 Scale scale_s01(GPIO_NUM_16, GPIO_NUM_17, calibration_factor);
 Scale scale_s02(GPIO_NUM_18, GPIO_NUM_19, calibration_factor);
 
+// Reads messages in subscribed topics
+void callback(char* topic, byte* payload, unsigned int length) {
+    std::string message;
+    for (int i = 0; i < length; i++) {
+        message += (char)payload[i];
+    }
+
+    Serial.printf("[MQTT] Mensagem recebida. Tópico: %s | Conteúdo: %s\n", topic, message.c_str());
+
+    dispatch_messages(topic, message.c_str());
+}
+
 void setup() {
-    // configure_pin(STATUS, Mode::output);  // Status embedded LED
+    Serial.begin(115200);
+
+    // GPIO Setup
     configure_pin(RLY1, Mode::output);
     configure_pin(RLY2, Mode::output);
     set_output_state(RLY1, 1);  // Disabled
     set_output_state(RLY2, 1);  // Disabled
-    Serial.begin(115200);
-    setup_wifi();
-    setup_mqtt();
+
+    // WiFi Setup
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    Serial.print("Conecting to Wi-Fi");
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("\nWi-Fi Connected!");
+    Serial.printf("IP address: %s\n", WiFi.localIP().toString().c_str());
+
+    mqtt.begin(MQTT_BROKER, MQTT_PORT, MQTT_CLIENT_ID);
+    mqtt.setCallback(callback);
+
+    // Subscribe to topics
+    mqtt.subscribe("smfm/operation/start");
+    mqtt.subscribe("smfm/s01/operation/+");
+    mqtt.subscribe("smfm/s02/operation/+");
+
     scale_s01.begin();
     scale_s02.begin();
 
     timer = timerBegin(0, 80, true);
     timerAttachInterrupt(timer, &onTimer, true);
-    timerAlarmWrite(timer, 500000, true); // Em microssegundos
+    timerAlarmWrite(timer, 100000, true); // Em microssegundos
     timerAlarmEnable(timer);
 }
 
 void loop() {
     char payload[10];
-    if (!client.connected()) reconnect_mqtt();
-    client.loop();
+    mqtt.loop();
 
     if (pending_read) {
         portENTER_CRITICAL(&timerMux);
@@ -102,17 +134,9 @@ void loop() {
             scale_s02.is_active = false;
         }
 
-        // Send Scales Status
-        snprintf(payload, sizeof(payload), "%d", status1);
-        client.publish(STATUS_TOPIC_01.c_str(), payload);
-        snprintf(payload, sizeof(payload), "%d", status2);
-        client.publish(STATUS_TOPIC_02.c_str(), payload);
-
-        // Reading 01
-        snprintf(payload, sizeof(payload), "%.3f", weight_01);
-        client.publish(WEIGHT_TOPIC_01.c_str(), payload);
-        // Reading 02
-        snprintf(payload, sizeof(payload), "%.3f", weight_02);
-        client.publish(WEIGHT_TOPIC_02.c_str(), payload);
+        mqtt.publishWeight("s01", weight_01);
+        mqtt.publishWeight("s02", weight_02);
+        mqtt.publishStatus("s01", status1);
+        mqtt.publishStatus("s02", status2);
     }
 }
