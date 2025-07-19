@@ -60,24 +60,22 @@ void loop() {
         scale_s02.check_status();
 
         // Check scales status
-        if (status1 == 1 && status2 == 1) {
+        if (scale_s01.operation == false) {
+            set_output_state(RLY1, 1);
+            set_output_state(RLY2, 1);
+            scale_s01.is_active = false;
+            scale_s02.is_active = false;
+        } else if (status1 == 1 && status2 == 1) {
             // Not operating, disable both scales consumption
             set_output_state(RLY1, 1); // Scale 01
             set_output_state(RLY2, 1); // Scale 02
             scale_s01.is_active = false;
             scale_s02.is_active = false;
         } else if(status1 == 2 && status2 == 2){
-            if (scale_s01.operation == true) {
-                set_output_state(RLY1, 0);
-                set_output_state(RLY2, 1);
-                scale_s01.is_active = true;
-                scale_s02.is_active = false;
-            } else if (scale_s01.operation == false){
-                set_output_state(RLY1, 1);
-                set_output_state(RLY2, 1);
-                scale_s01.is_active = false;
-                scale_s02.is_active = false;
-            }
+            set_output_state(RLY1, 0);
+            set_output_state(RLY2, 1);
+            scale_s01.is_active = true;
+            scale_s02.is_active = false;
         } else if (status1 == 3 && status2 == 2){
             scale_s01.is_active = true;
             scale_s02.is_active = false;
