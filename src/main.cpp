@@ -59,9 +59,9 @@ void setup() {
     mqtt.setCallback(callback);
 
     // Subscribe to topics
-    mqtt.subscribe("smfm/operation/start");
-    mqtt.subscribe("smfm/s01/operation/+");
-    mqtt.subscribe("smfm/s02/operation/+");
+    mqtt.subscribe(Topics::System::START_OPERATION);
+    mqtt.subscribe(Topics::Scale01::COMMANDS);
+    mqtt.subscribe(Topics::Scale02::COMMANDS);
 
     scale_s01.begin();
     scale_s02.begin();

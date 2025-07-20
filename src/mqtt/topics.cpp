@@ -38,15 +38,15 @@ void handle_alarm_s02(std::string&& message) {
 }
 
 void dispatch_messages(std::string&& topic, std::string&& message) {
-    if (topic == START){
+    if (topic == Topics::System::START_OPERATION){
         handle_operation(message.c_str());
-    } else if (topic == TARE_S01) {
+    } else if (topic == Topics::Scale01::TARE) {
         handle_tare_s01(message.c_str());
-    } else if (topic == TARE_S02) {
+    } else if (topic == Topics::Scale02::TARE) {
         handle_tare_s02(message.c_str());
-    } else if (topic == ALARM_SETPOINT_01) {
+    } else if (topic == Topics::Scale01::SET_SETPOINT) {
         handle_alarm_s01(message.c_str());
-    } else if (topic == ALARM_SETPOINT_02) {
+    } else if (topic == Topics::Scale02::SET_SETPOINT) {
         handle_alarm_s02(message.c_str());
     }
 }

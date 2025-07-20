@@ -1,24 +1,43 @@
-#ifndef TOPICS_H
-#define TOPICS_H
+#ifndef TOPICS_IMPROVED_H
+#define TOPICS_IMPROVED_H
 
-#include <functional>
-const std::string SCALE_01 = "smfm/s01";
-const std::string SCALE_02 = "smfm/s02";
+#include <string>
 
-// SEND TOPICS
-const std::string WEIGHT_TOPIC_01 = SCALE_01 + "/measurement/weight";
-const std::string WEIGHT_TOPIC_02 = SCALE_02 + "/measurement/weight";
-const std::string STATUS_TOPIC_01 = SCALE_01 + "/operation/status";
-const std::string STATUS_TOPIC_02 = SCALE_02 + "/operation/status";
-const std::string CAL_FACTOR_TOPIC = "smfm/config/cal_factor";
-
-// RECEIVE TOPICS
-const std::string CAL_FACTOR_TOPIC_RB = "smfm/config/cal_factor";
-const std::string ALARM_SETPOINT_01 = SCALE_01 + "/config/alarm";
-const std::string ALARM_SETPOINT_02 = SCALE_02 + "/config/alarm";
-const std::string TARE_S01 = SCALE_01 + "/operation/tare";
-const std::string TARE_S02 = SCALE_02 + "/operation/tare";
-const std::string START = "smfm/operation/start";
+namespace Topics {
+    // Base topics
+    constexpr const char* BASE = "smfm";
+    
+    // Scale topics
+    namespace Scale01 {
+        constexpr const char* WEIGHT = "smfm/s01/measurement/weight";
+        constexpr const char* STATUS = "smfm/s01/operation/status";
+        constexpr const char* COMMANDS = "smfm/s01/operation/+";
+        
+        // Specific commands
+        constexpr const char* TARE = "smfm/s01/operation/tare";
+        constexpr const char* CALIBRATE = "smfm/s01/operation/calibrate";
+        constexpr const char* SET_SETPOINT = "smfm/s01/operation/set_setpoint";
+    }
+    
+    namespace Scale02 {
+        constexpr const char* WEIGHT = "smfm/s02/measurement/weight";
+        constexpr const char* STATUS = "smfm/s02/operation/status";
+        constexpr const char* COMMANDS = "smfm/s02/operation/+";
+        
+        // Specific commands
+        constexpr const char* TARE = "smfm/s02/operation/tare";
+        constexpr const char* CALIBRATE = "smfm/s02/operation/calibrate";
+        constexpr const char* SET_SETPOINT = "smfm/s02/operation/set_setpoint";
+    }
+    
+    // System topics
+    namespace System {
+        constexpr const char* LOG = "smfm/log";
+        constexpr const char* DIAGNOSTICS = "smfm/system/diagnostics";
+        constexpr const char* START_OPERATION = "smfm/operation/start";
+        constexpr const char* INFO = "smfm/system/info";
+    }
+}
 
 // DISPATCH MESSAGES
 void dispatch_messages(std::string&& topic, std::string&& message);
