@@ -35,7 +35,7 @@ void setup() {
 
     timer = timerBegin(0, 80, true);
     timerAttachInterrupt(timer, &onTimer, true);
-    timerAlarmWrite(timer, 500000, true); // Em microssegundos
+    timerAlarmWrite(timer, 200000, true); // Em microssegundos
     timerAlarmEnable(timer);
 }
 

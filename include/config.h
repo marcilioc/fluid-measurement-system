@@ -3,16 +3,16 @@
 
 // Wi-Fi
 #ifndef WIFI_SSID 
-    #define WIFI_SSID "Choras Home-2.4"
+    #define WIFI_SSID ""
 #endif
 
 #ifndef WIFI_PASSWORD
-    #define WIFI_PASSWORD "pretinho"
+    #define WIFI_PASSWORD ""
 #endif
 
 // MQTT
 #ifndef MQTT_BROKER
-    #define MQTT_BROKER "192.168.15.70"
+    #define MQTT_BROKER ""
 #endif
 
 #define MQTT_PORT 1883
