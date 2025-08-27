@@ -18,26 +18,12 @@ private:
 public:
     Scale(uint8_t dout, uint8_t sck, float factor);
 
-    bool is_active;
-    enum class Status {
-        DISCONNECTED,
-        CONNECTED,
-        STANDBY,
-        OPERATING,
-        EMPTY
-    };
-    Status conn_status = Status::DISCONNECTED;
-    bool operation = false;
-
-    void set_operation_status(bool op_status);
-    void set_alarm(float weight);
-    void check_status();
-    void begin();
-    float read_weight();
-    long read_raw_value();
+    void init();
     void tare();
-    void set_calibration_factor(float factor);
+    long read_raw_value();
+    float read_weight();
     float get_calibration_factor();
+    void set_calibration_factor(float factor);
 };
 
 #endif
