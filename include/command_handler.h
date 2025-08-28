@@ -2,12 +2,13 @@
 #define COMMAND_HANDLER_H
 
 #include <Arduino.h>
-#include <ArduinoJson.h>
 
 class CommandHandler {
 private:
-    void handleLedCommand(String payload);
-    void handleRelayCommand(String payload);
+    void handlePump1Command(String payload);
+    void handlePump2Command(String payload);
+    void handleSlnd1Command(String payload);
+    void handleSlnd2Command(String payload);
     void handleConfigCommand(String payload);
     
 public:

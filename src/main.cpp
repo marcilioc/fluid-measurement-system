@@ -1,19 +1,20 @@
 #include <WiFi.h>
 #include "mqtt_manager.h"
+#include "command_handler.h"
 #include "config.h"
 #include "scale.h"
 
-MqttManager mqttManager;
-
 static long calibration_factor = DEFAULT_CALIBRATION_FACTOR;
-
-// Weighting variables
-float s1_weight = 0;
-float s2_weight = 0;
 
 // Instantiate scales
 Scale scale1(SCALE1_DOUT, SCALE1_SCK, calibration_factor);
 Scale scale2(SCALE2_DOUT, SCALE2_SCK, calibration_factor);
+MqttManager mqttManager;
+CommandHandler commandHandler;
+
+// Weighting variables
+float s1_weight = 0;
+float s2_weight = 0;
 
 unsigned long last_reading = 0;
 const unsigned long SENSOR_INTERVAL = 500; // 0.5 segundos para começar
@@ -37,12 +38,15 @@ void setup() {
     Serial.println(WiFi.localIP());
     
     // Inicializar componentes
+    mqttManager.init();
     scale1.init();
     scale2.init();
-    mqttManager.init();
-    // Command Processor
+    commandHandler.init();
 
     // Configurar Callbacks
+    mqttManager.setCommandCallback([](String topic, String payload) {
+        commandHandler.handleCommand(topic, payload);
+    });
     
     Serial.println("Sistema inicializado - enviando dados a cada 0.5 segundos");
 }

@@ -1,6 +1,5 @@
 #include "mqtt_manager.h"
 #include "config.h"
-#include <ArduinoJson.h>
 
 MqttManager* MqttManager::instance = nullptr;
 
@@ -9,6 +8,8 @@ MqttManager::MqttManager() : client(wifiClient) {
 }
 
 void MqttManager::init() {
+    pinMode(EMBD_LED, OUTPUT);
+    digitalWrite(EMBD_LED, LOW); // LED off initially
     client.setServer(MQTT_BROKER, MQTT_PORT);
     client.setCallback(messageCallback);
     reconnect();
@@ -20,10 +21,18 @@ void MqttManager::reconnect() {
         
         if (client.connect(MQTT_CLIENT_ID)) {
             Serial.println("Conectado!");
+            digitalWrite(EMBD_LED, HIGH); // Indica conexão bem-sucedida
             // Reconnect to topics
+            bool success = client.subscribe(SUB_TOPIC);
+            if (success) {
+                Serial.println("Inscrito em: " + String(SUB_TOPIC));
+            } else {
+                Serial.println("Falha ao se inscrever em comandos");
+            }
 
             publishStatus("online");
         } else {
+            digitalWrite(EMBD_LED, LOW); // Indica falha na conexão
             Serial.print("Falha, rc=");
             Serial.print(client.state());
             Serial.println(" Tentando novamente em 5 segundos");
@@ -60,25 +69,6 @@ void MqttManager::handleMessage(String topic, String payload) {
     }
 }
 
-
-// void MqttManager::publishSensorData(const SensorData& data) {
-//     DynamicJsonDocument doc(200);
-//     doc["temperatura"] = data.temperature;
-//     doc["umidade"] = data.humidity;
-//     doc["timestamp"] = millis();
-//     doc["device_id"] = MQTT_CLIENT_ID;
-    
-//     String jsonString;
-//     serializeJson(doc, jsonString);
-    
-//     bool success = client.publish(TOPIC_SENSORS, jsonString.c_str());
-//     if (success) {
-//         Serial.println("Dados enviados: " + jsonString);
-//     } else {
-//         Serial.println("Falha ao enviar dados");
-//     }
-// }
-
 void MqttManager::publishImmediate(String topic, String payload) {
     client.publish(topic.c_str(), payload.c_str());
 }
@@ -89,4 +79,5 @@ void MqttManager::publishStatus(String status) {
 
 void MqttManager::setCommandCallback(std::function<void(String, String)> callback) {
     this->commandCallback = callback;
+    Serial.println("Callback de comandos configurado.");
 }

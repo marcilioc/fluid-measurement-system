@@ -1,37 +1,38 @@
 #include "command_handler.h"
-#include "Config.h"
+#include "config.h"
 
 void CommandHandler::init() {
+    // System Outputs
     pinMode(SLND1, OUTPUT);
     pinMode(SLND2, OUTPUT);
+    pinMode(PUMP1, OUTPUT);
+    pinMode(PUMP2, OUTPUT);
     
     // Estado inicial
     digitalWrite(SLND1, HIGH);
     digitalWrite(SLND2, HIGH);
+    digitalWrite(PUMP1, HIGH);
+    digitalWrite(PUMP2, HIGH);
     
     Serial.println("Command Handler inicializado");
 }
 
 void CommandHandler::handleCommand(String topic, String payload) {
     Serial.println("Processando comando: " + topic + " -> " + payload);
-    
-    // Parse do JSON
-    DynamicJsonDocument doc(200);
-    DeserializationError error = deserializeJson(doc, payload);
-    
-    if (error) {
-        Serial.println("Erro ao fazer parse do JSON");
-        return;
-    }
-    
+
     // Extrair comando do tópico (comandos/led, comandos/relay, etc.)
     String command = topic.substring(topic.lastIndexOf('/') + 1);
-    
-    if (command == "led") {
-        handleLedCommand(payload);
+    if (command == "slnd1") {
+        handleSlnd1Command(payload);
     }
-    else if (command == "relay") {
-        handleRelayCommand(payload);
+    else if (command == "slnd2") {
+        handleSlnd2Command(payload);
+    }
+    else if (command == "pump2") {
+        handlePump2Command(payload);
+    }
+    if (command == "pump1") {
+        handlePump1Command(payload);
     }
     else if (command == "config") {
         handleConfigCommand(payload);
@@ -41,42 +42,56 @@ void CommandHandler::handleCommand(String topic, String payload) {
     }
 }
 
-void CommandHandler::handleLedCommand(String payload) {
-    DynamicJsonDocument doc(100);
-    deserializeJson(doc, payload);
-    
-    String action = doc["action"];
-    
-    if (action == "on") {
-        digitalWrite(LED_PIN, HIGH);
-        Serial.println("LED ligado");
+void CommandHandler::handlePump1Command(String payload) {
+    if (payload == "1") {
+        digitalWrite(PUMP1, LOW); // Ativa a bomba (LOW para relé ativo)
+        Serial.println("Bomba 1 ligada");
     }
-    else if (action == "off") {
-        digitalWrite(LED_PIN, LOW);
-        Serial.println("LED desligado");
-    }
-    else if (action == "toggle") {
-        digitalWrite(LED_PIN, !digitalRead(LED_PIN));
-        Serial.println("LED alternado");
+    else if (payload == "0") {
+        digitalWrite(PUMP1, HIGH); // Desativa a bomba
+        Serial.println("Bomba 1 desligada");
     }
 }
 
-void CommandHandler::handleRelayCommand(String payload) {
-    DynamicJsonDocument doc(100);
-    deserializeJson(doc, payload);
-    
-    bool state = doc["state"];
-    digitalWrite(RELAY_PIN, state ? HIGH : LOW);
-    
-    Serial.println("Relay " + String(state ? "ligado" : "desligado"));
+void CommandHandler::handlePump2Command(String payload) {
+    if (payload == "1") {
+        digitalWrite(PUMP2, LOW); // Ativa a bomba (LOW para relé ativo)
+        Serial.println("Bomba 2 ligada");
+    }
+    else if (payload == "0") {
+        digitalWrite(PUMP2, HIGH); // Desativa a bomba
+        Serial.println("Bomba 2 desligada");
+    }
+}
+
+void CommandHandler::handleSlnd1Command(String payload) {
+    if (payload == "1") {
+        digitalWrite(SLND1, LOW); // Ativa o solenóide (LOW para relé ativo)
+        Serial.println("Solenoide 1 ativado");
+    }
+    else if (payload == "0") {
+        digitalWrite(SLND1, HIGH); // Desativa o solenóide
+        Serial.println("Solenoide 1 desativado");
+    }
+}
+
+void CommandHandler::handleSlnd2Command(String payload) {
+    if (payload == "1") {
+        digitalWrite(SLND2, LOW); // Ativa o solenóide (LOW para relé ativo)
+        Serial.println("Solenoide 2 ativado");
+    }
+    else if (payload == "0") {
+        digitalWrite(SLND2, HIGH); // Desativa o solenóide
+        Serial.println("Solenoide 2 desativado");
+    }
 }
 
 void CommandHandler::handleConfigCommand(String payload) {
-    DynamicJsonDocument doc(200);
-    deserializeJson(doc, payload);
-    
-    if (doc.containsKey("sensor_interval")) {
-        // Aqui você pode alterar configurações em tempo de execução
-        Serial.println("Nova configuração recebida");
+    // Exemplo simples: payload "reset" para reiniciar o sistema
+    if (payload == "reset") {
+        Serial.println("Reiniciando sistema...");
+        ESP.restart();
+    } else {
+        Serial.println("Comando de configuração não reconhecido: " + payload);
     }
 }
