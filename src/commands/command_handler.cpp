@@ -14,13 +14,13 @@ void CommandHandler::init() {
     digitalWrite(PUMP1, HIGH);
     digitalWrite(PUMP2, HIGH);
     
-    Serial.println("Command Handler inicializado");
+    Serial.println("Command Handler initialized.");
 }
 
 void CommandHandler::handleCommand(String topic, String payload) {
-    Serial.println("Processando comando: " + topic + " -> " + payload);
+    Serial.println("Processing command: " + topic + " -> " + payload);
 
-    // Extrair comando do tópico (comandos/led, comandos/relay, etc.)
+    // Extract command from topic (commands/pump1, commands/slnd1, etc.)
     String command = topic.substring(topic.lastIndexOf('/') + 1);
     if (command == "slnd1") {
         handleSlnd1Command(payload);
@@ -37,61 +37,75 @@ void CommandHandler::handleCommand(String topic, String payload) {
     else if (command == "config") {
         handleConfigCommand(payload);
     }
+    else if (command == "start") {
+        handleStartCommand(payload);
+    }
     else {
-        Serial.println("Comando não reconhecido: " + command);
+        Serial.println("Command not recognized: " + command);
     }
 }
 
 void CommandHandler::handlePump1Command(String payload) {
     if (payload == "1") {
-        digitalWrite(PUMP1, LOW); // Ativa a bomba (LOW para relé ativo)
-        Serial.println("Bomba 1 ligada");
+        digitalWrite(PUMP1, LOW); // Enables the pump (LOW for active relay)
+        Serial.println("Pump 1 enabled");
     }
     else if (payload == "0") {
-        digitalWrite(PUMP1, HIGH); // Desativa a bomba
-        Serial.println("Bomba 1 desligada");
+        digitalWrite(PUMP1, HIGH); // Disables the pump
+        Serial.println("Pump 1 disabled");
     }
 }
 
 void CommandHandler::handlePump2Command(String payload) {
     if (payload == "1") {
-        digitalWrite(PUMP2, LOW); // Ativa a bomba (LOW para relé ativo)
-        Serial.println("Bomba 2 ligada");
+        digitalWrite(PUMP2, LOW); // Enables the pump (LOW for active relay)
+        Serial.println("Pump 2 enabled");
     }
     else if (payload == "0") {
-        digitalWrite(PUMP2, HIGH); // Desativa a bomba
-        Serial.println("Bomba 2 desligada");
+        digitalWrite(PUMP2, HIGH); // Disables the pump
+        Serial.println("Pump 2 disabled");
     }
 }
 
 void CommandHandler::handleSlnd1Command(String payload) {
     if (payload == "1") {
-        digitalWrite(SLND1, LOW); // Ativa o solenóide (LOW para relé ativo)
-        Serial.println("Solenoide 1 ativado");
+        digitalWrite(SLND1, LOW); // Enables the solenoid (LOW for active relay)
+        Serial.println("Solenoid 1 enabled");
     }
     else if (payload == "0") {
-        digitalWrite(SLND1, HIGH); // Desativa o solenóide
-        Serial.println("Solenoide 1 desativado");
+        digitalWrite(SLND1, HIGH); // Disables the solenoid
+        Serial.println("Solenoid 1 disabled");
     }
 }
 
 void CommandHandler::handleSlnd2Command(String payload) {
     if (payload == "1") {
-        digitalWrite(SLND2, LOW); // Ativa o solenóide (LOW para relé ativo)
-        Serial.println("Solenoide 2 ativado");
+        digitalWrite(SLND2, LOW); // Enables the solenoid (LOW for active relay)
+        Serial.println("Solenoid 2 enabled");
     }
     else if (payload == "0") {
-        digitalWrite(SLND2, HIGH); // Desativa o solenóide
-        Serial.println("Solenoide 2 desativado");
+        digitalWrite(SLND2, HIGH); // Disables the solenoid
+        Serial.println("Solenoid 2 disabled");
+    }
+}
+
+void CommandHandler::handleStartCommand(String payload) {
+    if (payload == "1") {
+        op_started = true;
+        Serial.println("Operation started.");
+    }
+    else if (payload == "0") {
+        op_started = false;
+        Serial.println("Operation stopped.");
     }
 }
 
 void CommandHandler::handleConfigCommand(String payload) {
-    // Exemplo simples: payload "reset" para reiniciar o sistema
+    // Example: "reset" to restart the system
     if (payload == "reset") {
-        Serial.println("Reiniciando sistema...");
+        Serial.println("Restarting the system...");
         ESP.restart();
     } else {
-        Serial.println("Comando de configuração não reconhecido: " + payload);
+        Serial.println("Configuration command not recognized:" + payload);
     }
 }

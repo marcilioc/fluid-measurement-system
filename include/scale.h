@@ -13,7 +13,6 @@ private:
     int clk_pin;
     float last_reading;
     float calibration_factor;
-    float setpoint;
 
 public:
     Scale(uint8_t dout, uint8_t sck, float factor);

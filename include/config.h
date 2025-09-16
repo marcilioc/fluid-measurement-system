@@ -23,6 +23,7 @@
 #define WEIGHT1_TOPIC "smfm/measurement/s1/weight"
 #define WEIGHT2_TOPIC "smfm/measurement/s2/weight"
 #define STATUS_TOPIC "smfm/status"
+#define STATES_TOPIC "smfm/state"
 #define SUB_TOPIC "smfm/commands/+"
 
 // RELAY PINS
@@ -39,5 +40,10 @@
 
 // LED PINS
 #define EMBD_LED GPIO_NUM_2 // Pin D2 - Embedded LED
+#define PURGE_LED GPIO_NUM_4 // Pin D4 - Purge LED
+#define E1_COND_LED GPIO_NUM_33 // Pin D32 - E1 Conditioning LED
+#define E2_COND_LED GPIO_NUM_32 // Pin D33 - E2 Conditioning LED
+
+extern bool op_started; // Operation started flag
 
 #endif

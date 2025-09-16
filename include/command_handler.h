@@ -10,6 +10,7 @@ private:
     void handleSlnd1Command(String payload);
     void handleSlnd2Command(String payload);
     void handleConfigCommand(String payload);
+    void handleStartCommand(String payload);
     
 public:
     void init();
