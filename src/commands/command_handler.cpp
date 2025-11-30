@@ -1,5 +1,7 @@
 #include "command_handler.h"
+#include "app_globals.h"
 #include "config.h"
+#include <string.h>
 
 void CommandHandler::init() {
     // System Outputs
@@ -7,6 +9,9 @@ void CommandHandler::init() {
     pinMode(SLND2, OUTPUT);
     pinMode(PUMP1, OUTPUT);
     pinMode(PUMP2, OUTPUT);
+    pinMode(PURGE_LED, OUTPUT);
+    pinMode(E1_COND_LED, OUTPUT);
+    pinMode(E2_COND_LED, OUTPUT);
     
     // Estado inicial
     digitalWrite(SLND1, HIGH);
@@ -21,6 +26,7 @@ void CommandHandler::handleCommand(String topic, String payload) {
     Serial.println("Processing command: " + topic + " -> " + payload);
 
     // Extract command from topic (commands/pump1, commands/slnd1, etc.)
+    std::string s_topic = topic.c_str();    
     String command = topic.substring(topic.lastIndexOf('/') + 1);
     if (command == "slnd1") {
         handleSlnd1Command(payload);
@@ -39,6 +45,36 @@ void CommandHandler::handleCommand(String topic, String payload) {
     }
     else if (command == "start") {
         handleStartCommand(payload);
+    }
+    else if (command == "stop") {
+        handleStartCommand(payload);
+    }
+    else if (command == "tare_s1") {
+        scale1.tare();
+        Serial.println("Scale S1 tared.");
+    }
+    else if (command == "tare_s2") {
+            scale2.tare();
+            Serial.println("Scale S2 tared.");
+    }
+    else if (command == "set_factor_s1"){
+        double factor = payload.toFloat();
+        scale1.set_calibration_factor(factor);
+        Serial.println("Scale S1 calibration factor set to " + String(factor));
+    } 
+    else if (command == "set_factor_s2") {
+        float factor = payload.toFloat();
+        scale2.set_calibration_factor(factor);
+        Serial.println("Scale S2 calibration factor set to " + String(factor));
+    }
+    else if (command == "get_factor"){
+        if (s_topic.find("s1")) {
+            float factor = scale1.get_calibration_factor();
+            Serial.println("Scale S1 calibration factor: " + String(factor));
+        } else if (s_topic.find("s2")) {
+            float factor = scale2.get_calibration_factor();
+            Serial.println("Scale S2 calibration factor: " + String(factor));
+        }
     }
     else {
         Serial.println("Command not recognized: " + command);
