@@ -1,16 +1,21 @@
 #include <WiFi.h>
+#include "app_globals.h"
 #include "mqtt_manager.h"
 #include "command_handler.h"
 #include "state_machine.h"
 #include "config.h"
 #include "scale.h"
 
-static long calibration_factor = DEFAULT_CALIBRATION_FACTOR;
+static double s1_calibration_factor = S1_CALIBRATION_FACTOR;
+static double s2_calibration_factor = S2_CALIBRATION_FACTOR;
+
+bool prev_op = false;
+bool curr_op = false;
 bool op_started = false;
 
 // Instantiate scales
-Scale scale1(SCALE1_DOUT, SCALE1_SCK, calibration_factor);
-Scale scale2(SCALE2_DOUT, SCALE2_SCK, calibration_factor);
+Scale scale1(SCALE1_DOUT, SCALE1_SCK, s1_calibration_factor);
+Scale scale2(SCALE2_DOUT, SCALE2_SCK, s2_calibration_factor);
 MqttManager mqttManager;
 CommandHandler commandHandler;
 StateMachine stateMachine;
@@ -87,12 +92,25 @@ void loop() {
         } else {
             stateMachine.update(s2_weight, op_started);
         }
+        prev_op = curr_op;
+        curr_op = op_started;
+    
+        // Stop operation
+        if (curr_op == false && prev_op == true && (current_state != "IDLE" || current_state != "ERROR")) {
+            stateMachine.forceState(SystemState::IDLE);
+            digitalWrite(PUMP1, HIGH);
+            digitalWrite(PUMP2, HIGH);
+            digitalWrite(SLND1, HIGH);
+            digitalWrite(SLND2, HIGH);
+            Serial.println("Operation stopped.");
+        }
 
-        Serial.println("Scale 1 Weight: " + String(s1_weight) + "\nScale 2 Weight: " + String(s2_weight));
+        Serial.println("Scale 1 Weight (kg): " + String(s1_weight) + "\nScale 2 Weight (kg): " + String(s2_weight));
         Serial.println("Current State: " + stateMachine.getStateString());
         
         mqttManager.publishImmediate(WEIGHT1_TOPIC, String(s1_weight));
         mqttManager.publishImmediate(WEIGHT2_TOPIC, String(s2_weight));
+        mqttManager.publishImmediate(STATES_TOPIC, String(static_cast<int>(stateMachine.getCurrentState())));
         last_reading = millis();
     }
 }

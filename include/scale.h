@@ -1,7 +1,8 @@
 #ifndef SCALE_H
 #define SCALE_H
 
-#define DEFAULT_CALIBRATION_FACTOR 97980
+#define S1_CALIBRATION_FACTOR 103680
+#define S2_CALIBRATION_FACTOR 96700
 
 #include <HX711.h>
 #include "config.h"
