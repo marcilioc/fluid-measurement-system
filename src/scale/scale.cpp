@@ -21,7 +21,10 @@ long Scale::read_raw_value() {
 }
 
 float Scale::read_weight() {
-    last_reading = hx_conv.get_units(10);
+    last_reading = hx_conv.get_units(5);
+    if (last_reading < 0 && last_reading > -0.001) {
+        last_reading = 0;
+    }
     return last_reading;
 }
 
